@@ -49,7 +49,7 @@ main:
 	
 # args: filename (a0)
 read: 
-	lw $t0, -12($sp)						# load buffer size
+	lw $t0, -8($sp)							# load array size
 	
 	li $v0, 13								# open file for reading		
 	li $a1, 00				
@@ -59,7 +59,7 @@ read:
 	
 	li $v0, 14								# read from file
 	move $a1, $fp							# set starting address
-	move $a2, $t0							# set buffer size
+	move $a2, $t0							# set buffer size = array size
 	syscall
 	
 	jr $ra
@@ -75,7 +75,7 @@ write:
 	
 	li $v0, 15								# write
 	la $a1, ($fp)							# load start address of C
-	lw $a2, -8($sp)							# load buffer size
+	lw $a2, -8($sp)							# load array size
 	syscall
 	
 	move $s0, $v0							# save output code
