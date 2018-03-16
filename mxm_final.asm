@@ -38,9 +38,11 @@ main:
 	
 	jal mxm									# calculate MxM
 	
-	la $a0, C_out							# set filename							
+	jal print								# print dot product	
 	
-	jal print								# print dot product						
+	la $a0, C_out							# set filename
+	
+	jal write								# write to C
 	
 	li $v0, 10								# exit
 	syscall
@@ -61,6 +63,27 @@ read:
 	syscall
 	
 	jr $ra
+	
+# args: filename (a0)
+write:
+	li $v0, 13								# open file
+	li $a1, 0x41
+	li $a2, 0x1FF
+	syscall
+	
+	move $a0, $v0							# move descriptor to a0
+	
+	li $v0, 15								# write
+	la $a1, ($fp)							# load start address of C
+	lw $a2, -8($sp)							# load buffer size
+	syscall
+	
+	move $s0, $v0							# save output code
+	
+	li $v0, 16								# close file
+	syscall
+	
+	jr $ra
 
 # args: filename (a0)	
 print:
@@ -76,9 +99,11 @@ print:
 		syscall
 	
 		addi $fp, $fp, 4						# increment fp
-		addi $t0, $t0, 1						# increment counter	
+		addi $t0, $t0, 1						# increment counter
 		bne $t0, 64, print_loop
-	
+		
+	lw $t0, -8($sp)								# load array size
+	sub $fp, $fp, $t0							# reset fp
 	jr $ra
 	
 	
