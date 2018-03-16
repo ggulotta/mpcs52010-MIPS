@@ -10,12 +10,10 @@ main:
 	li $t1, 4					
 	mul $t2, $t0, $t0
 	mul $t2, $t2, $t1						# 4 * n * n = 256
-	add $t3, $t2, $t2						# 8 * n * n = 512
 	li $t4, 0								# i = 0
 	li $t5, 0								# j = 0
 	sw $t0, -4($sp)							# store n
 	sw $t2, -8($sp)							# store array size
-	sw $t3, -12($sp)						# store buffer size
 	sw $t4, -16($sp)						# store i
 	sw $t5,	-20($sp)						# store j
 	
@@ -49,8 +47,6 @@ main:
 	
 # args: filename (a0)
 read: 
-	lw $t0, -8($sp)							# load array size
-	
 	li $v0, 13								# open file for reading		
 	li $a1, 00				
 	li $a2, 0777			
@@ -59,7 +55,7 @@ read:
 	
 	li $v0, 14								# read from file
 	move $a1, $fp							# set starting address
-	move $a2, $t0							# set buffer size = array size
+	lw $a2, -8($sp)							# set buffer size = array size
 	syscall
 	
 	jr $ra
@@ -75,7 +71,7 @@ write:
 	
 	li $v0, 15								# write
 	la $a1, ($fp)							# load start address of C
-	lw $a2, -8($sp)							# load array size
+	lw $a2, -8($sp)							# set buffer size = array size
 	syscall
 	
 	move $s0, $v0							# save output code
@@ -111,7 +107,6 @@ print:
 mxm:
 	move $fp, $a2							# set frame pointer to C's start address
 	move $s0, $a0							# store start address of A in s0
-	move $s7, $s0							# save initial start address of A in s7
 	move $s1, $a1							# store start address of B in s1
 	move $s2, $a2							# store start address of C in s2
 	move $s3, $a3							# store n in s3
@@ -137,13 +132,11 @@ mxm:
 			addi $s2, $s2, 4				# increment start address of C by 4
 			lw $t0, -20($sp)				# load j
 			addi $t0, $t0, 1				# increment j
-			move $s6, $t0					# save j in register s6
 			sw $t0, -20($sp)				# save j
 			bne $t0, $s3, mxm_inner 
 		
 		lw $t0, -16($sp)					# load i
 		addi $t0, $t0, 1					# increment i
-		move $s5, $t0						# save i in register s5
 		sw $t0, -16($sp)					# save i
 		li $t1, 4
 		mul $t1, $t1, $s3
